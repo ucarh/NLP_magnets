@@ -1,0 +1,16 @@
+# Ignore everything
+*
+
+# But not these files...
+!.gitignore
+!*.py
+!*.ipynb
+!*.sh
+
+!qa/*.json
+!ner/*.txt
+# etc...
+
+# ...even if they are in subdirectories
+!*/
+perplexity plot.ipynb
