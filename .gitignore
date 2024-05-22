@@ -9,6 +9,8 @@
 
 !qa/*.json
 !ner/*.txt
+!Tc_datasets_generated/*
+!list_of_DOIs.csv
 # etc...
 
 # ...even if they are in subdirectories
