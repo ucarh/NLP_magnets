@@ -21,6 +21,7 @@ args=parser.parse_args()
 if not os.path.exists(args.model_checkpoint):
     os.makedirs(args.model_checkpoint)
 
+#Below were are reading the checkpoints for each model for the CNER and QA tasks.
 if args.model_checkpoint=="magmatbert":
     token_model_chekpoint="nlp-magnets/CNER_best_magmatbert_10_epochs_lr_3e-05_BS_32"
     qa_model_checkpoint="nlp-magnets/QA_best_Tc_finetunedmagmatbert_10_epochs_lr_5e-05_BS_16"
@@ -47,6 +48,7 @@ token_classifier = pipeline(
 
 question_answerer = pipeline("question-answering", model=qa_model_checkpoint)
 
+#this checks if the answer extracted are numerical answers.
 def has_numbers(inputString):
     return bool(re.search(r'\d', inputString))
 
@@ -55,6 +57,7 @@ def frac2string(s):
     f = Fraction(f)
     return str(int(i) + round(float(f),2))
 
+#this is to split the corpus into sentences.
 ds_class=Sentence_dataset("nlp-magnets/Classified_dataset","nlp-magnets/magnetics_corpus_all")
 processed_classfied_ds=ds_class.process_classified_ds(args.batch)
 
@@ -62,6 +65,7 @@ processed_classfied_ds=ds_class.process_classified_ds(args.batch)
 db_for_doi_sent=defaultdict(list)
 db=defaultdict(list)
 
+#this funnel filters out the sentences if they contain these phrases.
 funnel=["ferroelectric","multiferroic","Ferroelectric","Multiferroic","paramagnetic Curie temperature","Paramagnetic Curie temperature"]
 
 progress_bar = tqdm(range(len(processed_classfied_ds)))
@@ -96,6 +100,7 @@ for i,sentences in enumerate(processed_classfied_ds['sentences']):
                         else:
                             continue
                         
+                        #we are making sure the compounds contain one of these elements at least as they are spin polarized.
                         if any(k in ['Fe',"Ni","Co","Gd","Mn","Cr","Pt","Pd","La","Ce","Pr","Nd","Pm","Sm","Eu","Gd","Tb","Dy","Ho","Er","Tm","Te","Se","Ge","U"] for k,v in comp.as_dict().items()) and not any("0+" in k for k,v in comp.as_dict().items()):
                         
                             if entity_org not in entity_list and entity_pymat not in ELEMENTS and not any(substr in entity_org for substr in ["FCC","BCC","L10","PrCoB","PrFeB","NdFeB","Nd-Fe-B"]) and entity_org!="SmCo" and entity_org!="Sm-Co" and entity_org!="Sm-Co-N" and entity_org!="FeN" and entity_org!="Fe-N" and entity_org!="(Ga,Mn)As":
@@ -106,6 +111,8 @@ for i,sentences in enumerate(processed_classfied_ds['sentences']):
                                 if "no-answer" in answer['answer']:
                                     continue
                                 
+                                #confidence score >0.4 is to make sure the extracted answer is confident.
+                                #below codes puts the results in a dictionary. 
                                 if has_numbers(answer['answer']) and answer['score']>0.4 and not any(x in answer['answer'] for x in ['less','more','smaller','larger','higher','lower','above','below','between',"J/kg"]) and answer['answer'].endswith("K"):
                                     unit="K"
                                     db[entity_pymat].append(answer['answer'])

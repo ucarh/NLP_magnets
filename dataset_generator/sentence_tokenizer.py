@@ -23,6 +23,7 @@ class Sentence_dataset():
         
         return ds
 
+#below function trains a sentence tokenizer on scientific texts.
     def train_get_sent_tokenizer(self):
         
         magnetics_ds=self.get_magnetics_ds()
@@ -46,6 +47,7 @@ class Sentence_dataset():
     def combine_abs_text(self,example):
         return {"abs_text":example["abstract"]+" "+example["text"]}
 
+#this breaks the corpus in a list of sentences.
     def process_classified_ds(self,batch):
         classified_ds=self.get_classified_ds()
         classified_ds=classified_ds.shuffle(seed=42)
